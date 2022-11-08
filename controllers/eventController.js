@@ -25,6 +25,7 @@ exports.createEvent = async (req, res, next) => {
 
         req.body.images = imagesLink;
         const event = await Event.create(req.body);
+        res.set({'X-Total-Count': eventsCount,'Access-Control-Allow-Origin':"*",'Access-Control-Expose-Headers':' X-Total-Count'});
         res.status(201).json({
             success: true,
             event
@@ -80,6 +81,7 @@ exports.updateEvent = async (req, res, next) => {
             useFindAndModify: false
         });
 
+        res.set({'X-Total-Count': eventsCount,'Access-Control-Allow-Origin':"*",'Access-Control-Expose-Headers':' X-Total-Count'});
         res.status(200).json({
             success: true,
             event
@@ -107,6 +109,7 @@ exports.deleteEvent = async (req, res, next) => {
 
         await event.remove();
 
+        res.set({'X-Total-Count': eventsCount,'Access-Control-Allow-Origin':"*",'Access-Control-Expose-Headers':' X-Total-Count'});
         res.status(200).json({
             success: true,
             message: "Event deleted"
@@ -128,6 +131,7 @@ exports.getEventDetails = async (req, res, next) => {
             })
         }
 
+        res.set({'X-Total-Count': eventsCount,'Access-Control-Allow-Origin':"*",'Access-Control-Expose-Headers':' X-Total-Count'});
         res.status(200).json({
             success: true,
             event,
@@ -143,11 +147,8 @@ exports.getAllEvents = async (req, res) => {
     try {
         const eventsCount = await Event.countDocuments();
         const events = await Event.find();
-        res.status(201).json({
-            success: true,
-            events,
-            eventsCount,
-        })
+        res.set({'X-Total-Count': eventsCount,'Access-Control-Allow-Origin':"*",'Access-Control-Expose-Headers':' X-Total-Count','mode':'no-cors'});
+        res.status(201).send(events)
     } catch (err) {
         res.send(err.message);
     }

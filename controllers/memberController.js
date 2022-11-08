@@ -7,6 +7,7 @@ exports.addMember = async (req, res) => {
         // const myCloud = await cloudinary.v2.uploader.upload(req.body.avatar, {
         //     folder: "avatars",
         // });
+        const memberCount = await Member.countDocuments();
         const { name, role, session,year, socialMedia } = req.body;
         const member = await Member.create({
             name,
@@ -21,6 +22,7 @@ exports.addMember = async (req, res) => {
                 // url: myCloud.secure_url,
             }
         });
+        res.set({'X-Total-Count': memberCount,'Access-Control-Allow-Origin':"*",'Access-Control-Expose-Headers':' X-Total-Count'});
         res.status(201).json({
             success: true,
             member
@@ -48,6 +50,7 @@ exports.updateMember = async (req, res, next) => {
             useFindAndModify: false
         });
 
+        res.set({'X-Total-Count': memberCount,'Access-Control-Allow-Origin':"*",'Access-Control-Expose-Headers':' X-Total-Count'});
         res.status(200).json({
             success: true,
             member
@@ -74,6 +77,7 @@ exports.deleteMember = async (req, res, next) => {
 
         await member.remove();
 
+        res.set({'X-Total-Count': memberCount,'Access-Control-Allow-Origin':"*",'Access-Control-Expose-Headers':' X-Total-Count'});
         res.status(200).json({
             success: true,
             message: "Member deleted"
@@ -101,6 +105,28 @@ exports.getMembers = async (req, res) => {
             success: true,
             devWing, cpWing, executiveWing, mlWing, designWing, litreatureWing, coHeads, members
         });
+
+    } catch (err) {
+        res.send(err.message)
+    }
+}
+//get All Members
+exports.getAllMembers = async (req, res) => {
+    try {
+        const regex1 = /Co-Head/
+        const members = await Member.find();
+
+        const devWing = members.filter((ele) => { return ele.role === "Dev-Wing"; })
+        const cpWing = members.filter((ele) => { return ele.role === "CP-Wing"; })
+        const executiveWing = members.filter((ele) => { return ele.role === "Executive-Wing"; })
+        const mlWing = members.filter((ele) => { return ele.role === "ML-Wing"; })
+        const designWing = members.filter((ele) => { return ele.role === "Design-Wing"; })
+        const litreatureWing = members.filter((ele) => { return ele.role === "Litreature-Wing"; })
+        const coHeads = members.filter((ele) => { return regex1.test(ele.role); })
+
+        const memberCount = await Member.countDocuments();
+        res.set({'X-Total-Count': memberCount,'Access-Control-Allow-Origin':"*",'Access-Control-Expose-Headers':' X-Total-Count'});
+        res.status(200).send({data:[...members]});
 
     } catch (err) {
         res.send(err.message)
